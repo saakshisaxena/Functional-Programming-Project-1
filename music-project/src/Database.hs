@@ -5,10 +5,10 @@
 
 module Database (
     initialiseDB,
-    getOrCreateCountry,
-    saveRecords,
-    queryCountryAllEntries,
-    queryCountryTotalCases
+    -- getOrCreateCountry,
+    -- saveAbilities,
+    -- queryCountryAllEntries, -- queries
+    -- queryCountryTotalCases -- queries
 ) where
 
 import Types
@@ -19,60 +19,55 @@ import Database.SQLite.Simple
 
 initialiseDB :: IO Connection
 initialiseDB = do
-        conn <- open "covid.sqlite"
-        execute_ conn "CREATE TABLE IF NOT EXISTS countries (\
-            \id INTEGER PRIMARY KEY AUTOINCREMENT,\
-            \country VARCHAR(80) NOT NULL, \
-            \continent VARCHAR(50) NOT NULL, \
-            \population INT DEFAULT NULL \
-            \)"
+        conn <- open "pokemon.sqlite"
+        -- execute_ conn "CREATE TABLE IF NOT EXISTS countries (\
+        --     \id INTEGER PRIMARY KEY AUTOINCREMENT,\
+        --     \country VARCHAR(80) NOT NULL, \
+        --     \continent VARCHAR(50) NOT NULL, \
+        --     \population INT DEFAULT NULL \
+        --     \)"  ENTRIED HAS Pokemon id, name of the ability  and url of that ability
         execute_ conn "CREATE TABLE IF NOT EXISTS entries (\
-            \date VARCHAR(40) NOT NULL, \
-            \day VARCHAR(40) NOT NULL, \
-            \month VARCHAR(40) NOT NULL, \
-            \year VARCHAR(40) NOT NULL, \
-            \cases INT DEFAULT NULL, \
-            \deaths INT DEFAULT NULL, \
-            \fk_country INTEGER\
+            \name VARCHAR(40) NOT NULL, \
+            \url VARCHAR(40) NOT NULL\
             \)"
         return conn
 
-getOrCreateCountry :: Connection -> String -> String -> Maybe Int -> IO Country
-getOrCreateCountry conn coun cont pop = do
-    results <- queryNamed conn "SELECT * FROM countries WHERE country=:country AND continent=:continent" [":country" := coun, ":continent" := cont]    
-    if length results > 0 then
-        return . head $ results
-    else do
-        execute conn "INSERT INTO countries (country, continent, population) VALUES (?, ?, ?)" (coun, cont, pop)
-        getOrCreateCountry conn coun cont pop
+-- getOrCreateCountry :: Connection -> String -> String -> Maybe Int -> IO Country
+-- getOrCreateCountry conn coun cont pop = do
+--     results <- queryNamed conn "SELECT * FROM countries WHERE country=:country AND continent=:continent" [":country" := coun, ":continent" := cont]    
+--     if length results > 0 then
+--         return . head $ results
+--     else do
+--         execute conn "INSERT INTO countries (country, continent, population) VALUES (?, ?, ?)" (coun, cont, pop)
+--         getOrCreateCountry conn coun cont pop
 
-createRecord :: Connection -> Record -> IO ()
-createRecord conn record = do
-    c <- getOrCreateCountry conn (country record) (continent record) (population record)
-    let entry = Entry {
-        date_ = date record,
-        day_ = day record,
-        month_ = month record,
-        year_ = year record,
-        cases_ = cases record,
-        deaths_ = deaths record,
-        fk_country = id_ c
-    }
-    execute conn "INSERT INTO entries VALUES (?,?,?,?,?,?,?)" entry
+-- createRecord :: Connection -> Record -> IO ()
+-- createRecord conn record = do
+--     c <- getOrCreateCountry conn (country record) (continent record) (population record)
+--     let entry = Entry {
+--         date_ = date record,
+--         day_ = day record,
+--         month_ = month record,
+--         year_ = year record,
+--         cases_ = cases record,
+--         deaths_ = deaths record,
+--         fk_country = id_ c
+--     }
+--     execute conn "INSERT INTO entries VALUES (?,?,?,?,?,?,?)" entry
 
-saveRecords :: Connection -> [Record] -> IO ()
-saveRecords conn = mapM_ (createRecord conn)
+-- saveAbilities :: Connection -> [Ability] -> IO ()
+-- saveAbilities conn = mapM_ (createAbility conn)
 
-queryCountryAllEntries :: Connection -> IO [Record]
-queryCountryAllEntries conn = do
-    putStr "Enter country name > "
-    countryName <- getLine
-    putStrLn $ "Looking for " ++ countryName ++ " entries..."
-    let sql = "SELECT date, day, month, year, cases, deaths, country, continent, population FROM entries inner join countries on entries.fk_country == countries.id WHERE country=?"
-    query conn sql [countryName]
+-- queryCountryAllEntries :: Connection -> IO [Record]
+-- queryCountryAllEntries conn = do
+--     putStr "Enter country name > "
+--     countryName <- getLine
+--     putStrLn $ "Looking for " ++ countryName ++ " entries..."
+--     let sql = "SELECT date, day, month, year, cases, deaths, country, continent, population FROM entries inner join countries on entries.fk_country == countries.id WHERE country=?"
+--     query conn sql [countryName]
 
-queryCountryTotalCases :: Connection -> IO ()
-queryCountryTotalCases conn = do
-    countryEntries <- queryCountryAllEntries conn
-    let total = sum (map cases countryEntries)
-    print $ "Total entries: " ++ show(total)
+-- queryCountryTotalCases :: Connection -> IO ()
+-- queryCountryTotalCases conn = do
+--     countryEntries <- queryCountryAllEntries conn
+--     let total = sum (map cases countryEntries)
+--     print $ "Total entries: " ++ show(total)

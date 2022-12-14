@@ -8,12 +8,15 @@ main :: IO ()
 main = fetchFunction
 
 fetchFunction = do
-    let url = "https://pokeapi.co/api/v2/pokemon/1/"
+    print "Please enter what pokemon's ability you want to see..."
+    poke_id <- getLine  
+    let url = "https://pokeapi.co/api/v2/pokemon/" ++ poke_id
+    print url
     print "Downloading..."
     json <- download url
     print "Parsing..."
-    case (parseRecords json) of
+    case (parseAbilities json) of
         Left err -> print err
         Right recs -> do
             print "Done Parsing"
-            main
+            -- main
