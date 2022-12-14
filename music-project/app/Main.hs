@@ -8,7 +8,7 @@ main :: IO ()
 main = fetchFunction
 
 fetchFunction = do
-    let url = "https://opendata.ecdc.europa.eu/covid19/casedistribution/json/"
+    let url = "https://pokeapi.co/api/v2/pokemon/1/"
     print "Downloading..."
     json <- download url
     print "Parsing..."
