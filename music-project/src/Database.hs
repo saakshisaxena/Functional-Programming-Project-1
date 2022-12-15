@@ -7,7 +7,7 @@
 module Database (
     initialiseDB,
     -- getOrCreateCountry,
-    -- saveAbilities,
+    saveAbilities,
     -- queryCountryAllEntries, -- queries
     -- queryCountryTotalCases -- queries
 ) where
@@ -30,9 +30,7 @@ initialiseDB = do
         execute_ conn "CREATE TABLE IF NOT EXISTS entries (\
             \name VARCHAR(40) NOT NULL, \
             \url VARCHAR(40) NOT NULL\
-            
-
-          \)"
+            \)"
         return conn
 
 createAbility :: Connection -> Ability -> IO ()
