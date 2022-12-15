@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+
 -- or, on GHCI:
 -- > :set -XOverloadedStrings
 
@@ -29,8 +30,22 @@ initialiseDB = do
         execute_ conn "CREATE TABLE IF NOT EXISTS entries (\
             \name VARCHAR(40) NOT NULL, \
             \url VARCHAR(40) NOT NULL\
-            \)"
+            
+
+          \)"
         return conn
+
+createAbility :: Connection -> Ability -> IO ()
+createAbility conn ability = do
+    let entry = Entry {
+        name_ = name ability,
+        url_ = url ability
+    }
+    return ()
+
+saveAbilities :: Connection -> [Ability] -> IO ()
+saveAbilities conn = mapM_ (createAbility conn)
+    
 
 -- getOrCreateCountry :: Connection -> String -> String -> Maybe Int -> IO Country
 -- getOrCreateCountry conn coun cont pop = do
@@ -41,8 +56,8 @@ initialiseDB = do
 --         execute conn "INSERT INTO countries (country, continent, population) VALUES (?, ?, ?)" (coun, cont, pop)
 --         getOrCreateCountry conn coun cont pop
 
--- createRecord :: Connection -> Record -> IO ()
--- createRecord conn record = do
+-- createAbility :: Connection -> Ability -> IO ()
+-- createAbility conn Ability = do
 --     c <- getOrCreateCountry conn (country record) (continent record) (population record)
 --     let entry = Entry {
 --         date_ = date record,
@@ -71,3 +86,4 @@ initialiseDB = do
 --     countryEntries <- queryCountryAllEntries conn
 --     let total = sum (map cases countryEntries)
 --     print $ "Total entries: " ++ show(total)
+-- createAbility : : Connection -> entries -> IO()
