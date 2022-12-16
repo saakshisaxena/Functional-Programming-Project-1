@@ -7,7 +7,8 @@
 module Database (
     initialiseDB,
     -- getOrCreateCountry,
-    saveAbilities,
+    saveDrinks,
+    queryAllDrinks
     -- queryCountryAllEntries, -- queries
     -- queryCountryTotalCases -- queries
 ) where
@@ -20,7 +21,7 @@ import Database.SQLite.Simple
 
 initialiseDB :: IO Connection
 initialiseDB = do
-        conn <- open "pokemon.sqlite"
+        conn <- open "cocktail.sqlite"
         -- execute_ conn "CREATE TABLE IF NOT EXISTS countries (\
         --     \id INTEGER PRIMARY KEY AUTOINCREMENT,\
         --     \country VARCHAR(80) NOT NULL, \
@@ -28,22 +29,37 @@ initialiseDB = do
         --     \population INT DEFAULT NULL \
         --     \)"  ENTRIED HAS Pokemon id, name of the ability  and url of that ability
         execute_ conn "CREATE TABLE IF NOT EXISTS entries (\
+            \idDrink VARCHAR(40) NOT NULL, \
             \name VARCHAR(40) NOT NULL, \
-            \url VARCHAR(40) NOT NULL\
+            \mainIngredient VARCHAR(40) NOT NULL, \
+            \glass VARCHAR(40) NOT NULL \
             \)"
         return conn
 
-createAbility :: Connection -> Ability -> IO ()
-createAbility conn ability = do
+createDrink :: Connection -> Drink -> IO ()
+createDrink conn drink = do
     let entry = Entry {
-        name_ = name ability,
-        url_ = url ability
+        idDrink_ = idDrink drink,
+        strDrink_ = strDrink drink,
+        strIngredient1_ = strIngredient1 drink,
+        strGlass_ = strGlass drink
     }
     return ()
 
-saveAbilities :: Connection -> [Ability] -> IO ()
-saveAbilities conn = mapM_ (createAbility conn)
+saveDrinks :: Connection -> [Drink] -> IO ()
+saveDrinks conn = mapM_ (createDrink conn)
     
+
+-- |Method to retrieve all the URLs on the database.
+queryAllDrinks :: Connection -> IO [String]
+queryAllDrinks conn = do
+    results <- query_ conn "SELECT name FROM entries" :: IO [Entry]
+    return $ map (\entry -> strDrink_ entry) results
+    -- let sql = "SELECT * FROM entries"
+    -- query conn sql
+    -- drinknames <- queryAllDrinks conn
+    -- return drinknames
+
 
 -- getOrCreateCountry :: Connection -> String -> String -> Maybe Int -> IO Country
 -- getOrCreateCountry conn coun cont pop = do

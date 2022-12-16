@@ -2,9 +2,8 @@
 
 module Types (
     Entry (..),
-    Ability (..),
-    AbilityProxi (..),
-    Abilities (..)
+    Drink (..),
+    Drinks (..)
 ) where
 
 import GHC.Generics
@@ -16,44 +15,49 @@ import Data.Aeson
 
 data Entry = Entry {
     -- pokId_ :: Int,
-    name_ :: String,
-    url_ :: String
+    -- name_ :: String,
+    -- url_ :: String
+    idDrink_ :: String,
+    strDrink_ :: String,
+    strIngredient1_ :: String,
+    strGlass_ :: String
 } deriving (Show)
 
-data Ability = Ability {
-    -- pokId :: Int,
-    name :: String,
-    url :: String
+data Drink = Drink {
+    idDrink :: String,
+    strDrink :: String,
+    strIngredient1 :: String,
+    strGlass :: String
     -- population :: Maybe Int
 } deriving (Show, Generic)
 
-data AbilityProxi = AbilityProxi {
-    ability :: Ability
-} deriving (Show, Generic)
-
-data Abilities = Abilities {
-    abilities :: [AbilityProxi]
+data Drinks = Drinks {
+    drinks :: [Drink]
 } deriving (Show, Generic)
 
 {-- Making above datatype instances of FromRow and ToRow type classes --}
 
 instance FromRow Entry where
-    fromRow = Entry <$> field <*> field
+    fromRow = Entry <$> field <*> field <*> field <*> field
 
 instance ToRow Entry where
-    toRow (Entry na ur)
-        = toRow (na, ur)
+    toRow (Entry d n m g)
+        = toRow (d, n, m, g)
 
-instance FromRow Ability where
-    fromRow = Ability <$> field <*> field
+instance FromRow Drink where
+    fromRow = Drink <$> field <*> field <*> field <*> field
 
-instance ToRow Ability where
-    toRow (Ability na ur)
-        = toRow (na, ur)
+instance ToRow Drink where
+    toRow (Drink d n m g)
+        = toRow (d, n, m, g)
 
 {-- Making above datatype instances of FromJSON type class --}
 
 renameFields :: String -> String
+renameFields "idDrink" = "idDrink"
+renameFields "name" = "strDrink" 
+renameFields "mainIngredient" = "strIngredient1" 
+renameFields "glass" = "strGlass"
 renameFields other = other
 
 customOptions :: Options
@@ -61,8 +65,7 @@ customOptions = defaultOptions {
     fieldLabelModifier = renameFields
 }
 
-instance FromJSON Ability where
+instance FromJSON Drink where
     parseJSON = genericParseJSON customOptions
 
-instance FromJSON AbilityProxi
-instance FromJSON Abilities
+instance FromJSON Drinks
