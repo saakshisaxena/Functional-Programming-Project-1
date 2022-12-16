@@ -2,6 +2,7 @@
 
 module Types (
     Entry (..),
+    Recipes (..),
     Drink (..),
     Drinks (..)
 ) where
@@ -23,11 +24,17 @@ data Entry = Entry {
     strGlass_ :: String
 } deriving (Show)
 
+data Recipes = Recipes {
+    idDrinks :: String,
+    strInstructions_ :: String
+} deriving (Show)
+
 data Drink = Drink {
     idDrink :: String,
     strDrink :: String,
     strIngredient1 :: String,
-    strGlass :: String
+    strGlass :: String,
+    strInstructions :: String
     -- population :: Maybe Int
 } deriving (Show, Generic)
 
@@ -45,11 +52,18 @@ instance ToRow Entry where
         = toRow (d, n, m, g)
 
 instance FromRow Drink where
-    fromRow = Drink <$> field <*> field <*> field <*> field
+    fromRow = Drink <$> field <*> field <*> field <*> field  <*> field
 
 instance ToRow Drink where
-    toRow (Drink d n m g)
-        = toRow (d, n, m, g)
+    toRow (Drink d n m g i)
+        = toRow (d, n, m, g, i)
+
+instance FromRow Recipes where
+    fromRow = Recipes <$> field <*> field
+
+instance ToRow Recipes where
+    toRow (Recipes d i)
+        = toRow (d, i)
 
 {-- Making above datatype instances of FromJSON type class --}
 
