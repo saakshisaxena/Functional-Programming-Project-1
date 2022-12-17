@@ -7,9 +7,11 @@ import Parse
 import Database
 import Control.Exception
 
+-- |Main function
 main :: IO ()
 main = fetchFunction
 
+-- |Interactive menu to display outputs based on options selected by the user
 fetchFunction = do
     putStrLn "-----------------------------------------------"
     putStrLn "  Welcome to the Cocktail Margarita data app  "

@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveGeneric #-}
 
+-- |Data types for our project
 module Types (
     Entry (..),
     Recipes (..),
@@ -45,7 +46,7 @@ data Drinks = Drinks {
     drinks :: [Drink]
 } deriving (Show, Generic)
 
-{-- Making above datatype instances of FromRow and ToRow type classes --}
+-- |Making above datatype instances of FromRow and ToRow type classes 
 
 instance FromRow Entry where
     fromRow = Entry <$> field <*> field <*> field <*> field <*> field
@@ -68,7 +69,7 @@ instance ToRow Recipes where
     toRow (Recipes d i)
         = toRow (d, i)
 
-{-- Making above datatype instances of FromJSON type class --}
+-- |Making above datatype instances of FromJSON type class
 
 renameFields :: String -> String
 renameFields "idDrink" = "idDrink"
