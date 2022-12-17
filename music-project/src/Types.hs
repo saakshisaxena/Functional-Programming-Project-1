@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveGeneric #-}
 
+-- |Data types for our project
 module Types (
     Entry (..),
     Recipes (..),
     Drink (..),
-    Drinks (..)
+    Drinks (..),
+    MyCustomError(..)
 ) where
 
 import GHC.Generics
@@ -12,12 +14,13 @@ import GHC.Generics
 import Database.SQLite.Simple.FromRow
 import Database.SQLite.Simple.ToRow
 
+import Control.Exception
+import Data.Typeable
+
 import Data.Aeson
 
 data Entry = Entry {
-    -- pokId_ :: Int,
-    -- name_ :: String,
-    -- url_ :: String
+     id_ :: Int, 
     idDrink_ :: String,
     strDrink_ :: String,
     strIngredient1_ :: String,
@@ -25,11 +28,12 @@ data Entry = Entry {
 } deriving (Show)
 
 data Recipes = Recipes {
-    idDrinks :: String,
+    fk_idDrinks :: Int,
     strInstructions_ :: String
 } deriving (Show)
 
 data Drink = Drink {
+   
     idDrink :: String,
     strDrink :: String,
     strIngredient1 :: String,
@@ -42,21 +46,21 @@ data Drinks = Drinks {
     drinks :: [Drink]
 } deriving (Show, Generic)
 
-{-- Making above datatype instances of FromRow and ToRow type classes --}
+-- |Making above datatype instances of FromRow and ToRow type classes 
 
 instance FromRow Entry where
-    fromRow = Entry <$> field <*> field <*> field <*> field
+    fromRow = Entry <$> field <*> field <*> field <*> field <*> field
 
 instance ToRow Entry where
-    toRow (Entry d n m g)
-        = toRow (d, n, m, g)
+    toRow (Entry p d n m g)
+        = toRow (p, d, n, m, g)
 
 instance FromRow Drink where
     fromRow = Drink <$> field <*> field <*> field <*> field  <*> field
 
 instance ToRow Drink where
     toRow (Drink d n m g i)
-        = toRow (d, n, m, g, i)
+        = toRow ( d, n, m, g, i)
 
 instance FromRow Recipes where
     fromRow = Recipes <$> field <*> field
@@ -65,7 +69,7 @@ instance ToRow Recipes where
     toRow (Recipes d i)
         = toRow (d, i)
 
-{-- Making above datatype instances of FromJSON type class --}
+-- |Making above datatype instances of FromJSON type class
 
 renameFields :: String -> String
 renameFields "idDrink" = "idDrink"
@@ -83,3 +87,6 @@ instance FromJSON Drink where
     parseJSON = genericParseJSON customOptions
 
 instance FromJSON Drinks
+
+data MyCustomError = SyntaxError | NumberTooSmall deriving (Show, Typeable)
+instance Exception MyCustomError

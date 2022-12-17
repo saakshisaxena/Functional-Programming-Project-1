@@ -5,16 +5,21 @@ import Types
 import Fetch
 import Parse
 import Database
+import Control.Exception
 
+-- |Main function
 main :: IO ()
 main = fetchFunction
 
+-- |Interactive menu to display outputs based on options selected by the user
 fetchFunction = do
     putStrLn "-----------------------------------------------"
     putStrLn "  Welcome to the Cocktail Margarita data app  "
     putStrLn "  (1) Download data                           "
     putStrLn "  (2) All margarita cocktail names            "
-    putStrLn "  (3) Quit                                    "
+    putStrLn "  (3) Enter drink name to get details         "
+    putStrLn "  (4) View all recipes                        "
+    putStrLn "  (5) Quit                                    "
     putStrLn "----------------------------------------------"
     conn <- initialiseDB
     hSetBuffering stdout NoBuffering
@@ -23,7 +28,6 @@ fetchFunction = do
     case option of
         1 -> do 
             let url = "https://www.thecocktaildb.com/api/json/v1/1/search.php?s=margarita"
-            print url
             print "Downloading..."
             json <- download url
             print "Parsing..."
@@ -40,7 +44,17 @@ fetchFunction = do
             print drinknames
             print "Done"
             main
-        3 -> print "Byee! Drink safely~"
-        _ -> print "Invalid option"
+        3 -> do
+            print "Query"
+            entries <- queryAllDrinksWithName conn
+            print entries
+            print "Done"
+            main
+        4 -> do
+            entries <- queryAllReceipes conn
+            print entries
+            main
+        5 -> print "Bye!"
+        _ -> throw SyntaxError
         
              

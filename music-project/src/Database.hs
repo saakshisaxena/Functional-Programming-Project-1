@@ -1,33 +1,31 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 
--- or, on GHCI:
--- > :set -XOverloadedStrings
+-- |Database initialization
 
 module Database (
     initialiseDB,
-    -- getOrCreateRecipe,
     saveDrinks,
-    queryAllDrinks
-    -- queryCountryAllEntries, -- queries
-    -- queryCountryTotalCases -- queries
+    queryAllDrinks,
+    queryAllDrinksWithName,
+    queryAllReceipes
 ) where
 
 import Types
 import Database.SQLite.Simple
 
--- See more Database.SQLite.Simple examples at
--- https://hackage.haskell.org/package/sqlite-simple-0.4.18.0/docs/Database-SQLite-Simple.html
+-- |Method to create our two tables 
 
 initialiseDB :: IO Connection
 initialiseDB = do
         conn <- open "cocktail.sqlite"
         execute_ conn "CREATE TABLE IF NOT EXISTS recipes (\
             \id INTEGER PRIMARY KEY AUTOINCREMENT,\
-            \fk_idDrink INTEGER,\
+            \fk_drinkId INTEGER,\
             \Instructions VARCHAR(80) NOT NULL \
             \)"
         execute_ conn "CREATE TABLE IF NOT EXISTS entries (\
+            \id INTEGER PRIMARY KEY AUTOINCREMENT,\
             \idDrink VARCHAR(40) NOT NULL, \
             \name VARCHAR(40) NOT NULL, \
             \mainIngredient VARCHAR(40) NOT NULL, \
@@ -35,39 +33,53 @@ initialiseDB = do
             \)"
         return conn
 
-        
+-- |Method to insert id, name, ingredient and glass values into the first table 
+getOrCreateDrink :: Connection -> Drink -> IO Entry
+getOrCreateDrink conn drink = do
+    results <- queryNamed conn "SELECT * FROM entries WHERE idDrink =:fk_idDrink" [":fk_idDrink" := idDrink drink]   
+    if length results > 0 then
+        return . head $ results
+    else do
+        let drinkid = idDrink drink
+        putStrLn drinkid
+        -- putStrLn  strDrink_ drink
+        execute conn "INSERT INTO entries(idDrink, name, mainIngredient, glass) VALUES (?,?,?, ?)" (idDrink drink, strDrink drink, strIngredient1 drink, strGlass drink)
+        getOrCreateDrink conn drink
 
-createDrink :: Connection -> Drink -> IO ()
-createDrink conn drink = do
-    -- c <- getOrCreateRecipe conn (idDrink drink) (strInstructions drink) 
-    let entry = Entry {
-        idDrink_ = idDrink drink,
-        strDrink_ = strDrink drink,
-        strIngredient1_ = strIngredient1 drink,
-        strGlass_ = strGlass drink
-    }
-    return ()
+-- |Method to insert id and instructions values into the second table
+createReceipes :: Connection -> Drink ->  IO ()
+createReceipes conn drink = do 
+    c <- getOrCreateDrink conn drink
+    execute conn "INSERT INTO recipes(fk_drinkId, Instructions) VALUES (?,?)" (id_ c, strInstructions drink)
 
+-- |Method to save Drinks table
 saveDrinks :: Connection -> [Drink] -> IO ()
-saveDrinks conn = mapM_ (createDrink conn)
+saveDrinks conn = mapM_ (createReceipes conn)
     
 
 -- |Method to retrieve all the URLs on the database.
 queryAllDrinks :: Connection -> IO [String]
 queryAllDrinks conn = do
-    results <- query_ conn "SELECT name FROM entries" :: IO [Entry]
+    results <- query_ conn "SELECT * FROM entries" :: IO [Entry]
     return $ map (\entry -> strDrink_ entry) results
-    -- let sql = "SELECT * FROM entries"
-    -- query conn sql
-    -- drinknames <- queryAllDrinks conn
-    -- return drinknames
+
+-- |Method to get information for a drink name
+queryAllDrinksWithName :: Connection -> IO [Entry]
+queryAllDrinksWithName conn = do 
+    putStr "Enter name: > "
+    name <- getLine
+    putStrLn $ "Looking for " ++ name ++ " entries..."
+    let sql = "SELECT * FROM entries WHERE name=?"
+    query conn sql [name]
+
+-- |Method to display both tables by linking them with foreign key
+queryAllReceipes :: Connection -> IO [Drink]
+queryAllReceipes conn = do 
+    let sql = "SELECT entries.idDrink, entries.name, entries.mainIngredient, entries.glass, recipes.Instructions FROM entries,recipes WHERE entries.id = recipes.fk_drinkId"
+    results <- query_ conn sql :: IO [Drink]
+    return results
 
 
--- getOrCreateRecipe :: Connection -> String -> String -> Maybe Int -> IO Recipes
--- getOrCreateRecipe conn coun cont pop = do
---     results <- queryNamed conn "SELECT * FROM receipes WHERE idDrinks=:idDrinks AND strInstructions=:strInstructions" [":idDrinks" := idD, ":strInstructions" := instr]    
---     if length results > 0 then
---         return . head $ results
---     else do
---         execute conn "INSERT INTO recipes (idDrinks, strInstructions) VALUES (?, ?)" (idD, instr)
---         getOrCreateRecipe conn idD instr
+
+
+
