@@ -5,13 +5,10 @@
 
 module Database (
     initialiseDB,
-    -- getOrCreateRecipe,
     saveDrinks,
     queryAllDrinks,
     queryAllDrinksWithName,
     queryAllReceipes
-    -- queryCountryAllEntries, -- queries
-    -- queryCountryTotalCases -- queries
 ) where
 
 import Types
@@ -78,9 +75,6 @@ queryAllDrinksWithName conn = do
 -- |Method to display both tables by linking them with foreign key
 queryAllReceipes :: Connection -> IO [Drink]
 queryAllReceipes conn = do 
-    -- putStr "Enter name: > "
-    -- name <- getLine
-    -- putStrLn $ "Looking for " ++ name ++ " entries..."
     let sql = "SELECT entries.idDrink, entries.name, entries.mainIngredient, entries.glass, recipes.Instructions FROM entries,recipes WHERE entries.id = recipes.fk_drinkId"
     results <- query_ conn sql :: IO [Drink]
     return results

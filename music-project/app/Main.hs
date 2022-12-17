@@ -17,7 +17,7 @@ fetchFunction = do
     putStrLn "  Welcome to the Cocktail Margarita data app  "
     putStrLn "  (1) Download data                           "
     putStrLn "  (2) All margarita cocktail names            "
-    putStrLn "  (3) Enter drink name                        "
+    putStrLn "  (3) Enter drink name to get details         "
     putStrLn "  (4) View all recipes                        "
     putStrLn "  (5) Quit                                    "
     putStrLn "----------------------------------------------"
@@ -28,7 +28,6 @@ fetchFunction = do
     case option of
         1 -> do 
             let url = "https://www.thecocktaildb.com/api/json/v1/1/search.php?s=margarita"
-            print url
             print "Downloading..."
             json <- download url
             print "Parsing..."

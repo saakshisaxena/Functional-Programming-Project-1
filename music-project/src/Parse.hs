@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+
 -- |This is our parse module
 module Parse (
     parseCocktails,

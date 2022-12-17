@@ -1,4 +1,3 @@
-
 -- |This is our fetch function    
 module Fetch (
     download
